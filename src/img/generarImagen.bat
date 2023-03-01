@@ -1,1 +1,2 @@
-dot -Tpng ./muestra.txt -o ./muestra.png
+dot -Tpng "./muestra.txt" -o "./muestra.png"
+"./muestra.png""

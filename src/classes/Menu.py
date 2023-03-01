@@ -64,7 +64,7 @@ class Menu:
             self.mostrar()
 
     def procesarInformacion(self,objetoXML):
-
+ 
         coleccionX  = objetoXML.getElementsByTagName('columnas')
         coleccionY  = objetoXML.getElementsByTagName('filas')
         muestra     = objetoXML.getElementsByTagName('muestra')
@@ -79,12 +79,14 @@ class Menu:
 
         organismosXML = objetoXML.getElementsByTagName('organismo')
 
+        letra = 65
         for organismo in organismosXML:
 
             codigo = organismo.childNodes[1].firstChild.data
             nombre = organismo.childNodes[3].firstChild.data
-            nuevoOrganismo = Organismo(codigo,nombre)
+            nuevoOrganismo = Organismo(codigo,nombre,letra)
             nuevaMuestra.listaOrganismos.agregar_al_inicio(nuevoOrganismo)
+            letra = letra + 1
 
         celdasVivasXML = objetoXML.getElementsByTagName('celdaViva')
 
@@ -113,7 +115,7 @@ class Menu:
                     
 
         """
-        cuentaX = 0
+        cuentaX = -1
         cuentaY = -1
         while (cuentaX < int(x)):
             if(cuentaY == -1):
@@ -125,12 +127,37 @@ class Menu:
             
             while (cuentaY < int(y)):
                 
-                if(cuentaX == 0):
+                if(cuentaX == -1):
                     codigoGraphiz=codigoGraphiz+'|'+str(cuentaY)
                 else:
-                    codigoGraphiz=codigoGraphiz+'|'
+                    listaCeldasVivas  = self.muestraAnalizada.listaCeldasVivas
+                    nodoActual = listaCeldasVivas.cabeza
+
+                    codigoOrganismo = ""
+                    while nodoActual != None:
+                       
+                        celdaViva:CeldaViva = nodoActual.dato
+                        coordenadaX = celdaViva.x
+                        coordenadaY = celdaViva.y
+                        
+                        if (int(cuentaX)==int(coordenadaX) and int(cuentaY) == int(coordenadaY)):
+                            
+                            inicio = self.muestraAnalizada.listaOrganismos.cabeza
+                            while(inicio!=None):
+                                organismo:Organismo = inicio.dato
+                                
+                                if(celdaViva.organismo==organismo.codigo):
+                                    codigoOrganismo='|'+chr(organismo.letra)
+                                    break
+                                inicio=inicio.siguiente
+                            break
+                        else:
+                            codigoOrganismo='|'
+                        nodoActual = nodoActual.siguiente
+
+                    codigoGraphiz = codigoGraphiz + codigoOrganismo
                 cuentaY = cuentaY + 1
-            
+                
             cuentaX = cuentaX + 1
             
             if(cuentaX == int(x)):
@@ -140,11 +167,18 @@ class Menu:
 
         codigoGraphiz =codigoGraphiz+ """
                         "];
-            }
+        """
+        inicio = self.muestraAnalizada.listaOrganismos.cabeza
+        codigoGraphiz =codigoGraphiz+"\""
+        while(inicio!=None):
+            organismo:Organismo = inicio.dato
+            codigoGraphiz =codigoGraphiz +chr(organismo.letra)+"-"+organismo.codigo+"\n"
+            inicio=inicio.siguiente
+        codigoGraphiz =codigoGraphiz+ """
+                        \"}     
         """
         archivo = open("./img/muestra.txt","w")
         archivo.write(codigoGraphiz)
         print("Creando imagen...")
         system("\"D:\\USAC\\2023 Semestre 1\\IPC 2 AUXILIATURA\\Ejemplos Practicos\\[IPC2]Proyecto1_201709144\\src\\img\\generarImagen.bat\"")
-        print("Abriendo imagen...")
-        system("\"D:\\USAC\\2023 Semestre 1\\IPC 2 AUXILIATURA\\Ejemplos Practicos\\[IPC2]Proyecto1_201709144\\src\\img\\muestra.png\"")
+        
